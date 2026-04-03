@@ -1,15 +1,12 @@
 package dev.dannytaylor.brick.fluxer;
 
-import com.j4fluxer.fluxer.FluxerImpl;
 import com.j4fluxer.fluxer.FluxerBuilder;
-import com.j4fluxer.internal.requests.Route;
+import com.j4fluxer.fluxer.FluxerImpl;
 import dev.dannytaylor.brick.config.BrickConfig;
 import dev.dannytaylor.brick.logger.BrickLoggerImpl;
 
 public class BrickFluxerBot {
     public final FluxerImpl bot = (FluxerImpl) FluxerBuilder.create(BrickConfig.instance.fluxerSettings.token.value()).build();
-
-    public static final Route GET_GUILD_EMOJIS = new Route(Route.Method.GET, "/guilds/{guild_id}/emojis");
 
     public BrickFluxerBot() {
         BrickLoggerImpl.info("Starting Fluxer Bot...");

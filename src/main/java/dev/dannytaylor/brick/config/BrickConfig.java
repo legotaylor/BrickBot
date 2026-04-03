@@ -21,6 +21,7 @@ public class BrickConfig extends ReflectiveConfig {
     public final FluxerSettings fluxerSettings = new FluxerSettings();
 
     public static class FluxerSettings extends Section {
+        public final TrackedValue<Boolean> enabled = this.value(true);
         public final TrackedValue<String> token = this.value("REPLACE_THIS_WITH_YOUR_FLUXER_TOKEN");
         public final TrackedValue<String> guildId = this.value("REPLACE_THIS_WITH_YOUR_FLUXER_GUILD_ID");
         public final TrackedValue<ValueList<String>> commandRoleId = this.list("", "REPLACE_THIS_WITH_YOUR_FLUXER_ROLE_ID");
@@ -47,6 +48,7 @@ public class BrickConfig extends ReflectiveConfig {
     public final DiscordSettings discordSettings = new DiscordSettings();
 
     public static class DiscordSettings extends Section {
+        public final TrackedValue<Boolean> enabled = this.value(true);
         public final TrackedValue<String> token = this.value("REPLACE_THIS_WITH_YOUR_DISCORD_TOKEN");
         public final TrackedValue<Long> applicationId = this.value(0L);
         public final TrackedValue<Long> guildId = this.value(0L);

@@ -6,9 +6,9 @@ import com.j4fluxer.entities.guild.Guild;
 import com.j4fluxer.entities.message.Message;
 import com.j4fluxer.internal.requests.Requester;
 import com.j4fluxer.internal.requests.RestAction;
+import com.j4fluxer.internal.requests.Route;
 import dev.dannytaylor.brick.BrickHytale;
 import dev.dannytaylor.brick.config.BrickConfig;
-import dev.dannytaylor.brick.fluxer.BrickFluxerBot;
 import dev.dannytaylor.brick.logger.BrickLoggerImpl;
 import discord4j.common.util.Snowflake;
 import discord4j.core.object.entity.channel.GuildChannel;
@@ -28,7 +28,7 @@ public class BrickBot {
     private static RestAction<Map<String, String>> getFluxerEmojis(Guild guild) {
         if (guild != null) {
             Requester requester = BrickHytale.getFluxer().bot.getRequester();
-            return new RestAction<>(requester, BrickFluxerBot.GET_GUILD_EMOJIS.compile(guild.getId())) {
+            return new RestAction<>(requester, Route.GET_EMOJIS.compile(guild.getId())) {
                 @Override
                 protected Map<String, String> handleResponse(String jsonStr) throws Exception {
                     Map<String, String> emojiMap = new HashMap<>();
@@ -113,14 +113,16 @@ public class BrickBot {
     }
 
     private static void sendDiscordMessage(String roleId, String message, MessageType type) {
-        Optional<Mono<GuildChannel>> channel = getDiscordChannel(type.getDiscord().getChannelId());
-        channel.ifPresent(guildChannelMono -> guildChannelMono.ofType(MessageChannel.class).flatMap(chat -> chat.createMessage(pingRole(roleId) + "\n" + parseDiscordEmojis(getDiscordServer().orElse(null), message))).subscribe());
+        if (BrickConfig.instance.discordSettings.enabled.value()) {
+            Optional<Mono<GuildChannel>> channel = getDiscordChannel(type.getDiscord().getChannelId());
+            channel.ifPresent(guildChannelMono -> guildChannelMono.ofType(MessageChannel.class).flatMap(chat -> chat.createMessage(pingRole(roleId) + "\n" + parseDiscordEmojis(getDiscordServer().orElse(null), message))).subscribe());
+        }
     }
 
     public static void send(String message, String username, MessageType type, Platform platform) {
         String samePlatformMessage = getMessage(message, username);
         String differentPlatformMessage = getMessage(message, username + platform.getFrom());
-        createFluxerMessage(type.getFluxer().getRoleId(), platform.equals(Platform.FLUXER) ? samePlatformMessage : differentPlatformMessage, type).queue();
+        if (BrickConfig.instance.fluxerSettings.enabled.value()) createFluxerMessage(type.getFluxer().getRoleId(), platform.equals(Platform.FLUXER) ? samePlatformMessage : differentPlatformMessage, type).queue();
         sendDiscordMessage(type.getDiscord().getRoleId().toString(), platform.equals(Platform.DISCORD) ? samePlatformMessage : differentPlatformMessage, type);
         BrickLoggerImpl.info(type.name() + ": " + differentPlatformMessage);
     }

@@ -30,7 +30,8 @@ dependencies {
 
     implementation("org.quiltmc:quilt-config:${project.quilt_config_version}")
     implementation("org.quiltmc.quilt-config.serializers:toml:${project.quilt_config_version}")
-    implementation("com.github.why-shiro:J4Fluxer:${project.j4fluxer_version}")
+    //implementation("com.github.why-shiro:J4Fluxer:${project.j4fluxer_version}")
+    implementation ("com.github.legotaylor:J4Fluxer:904782e08e")
     implementation "com.discord4j:discord4j-core:${project.discord4j_version}"
 }
 

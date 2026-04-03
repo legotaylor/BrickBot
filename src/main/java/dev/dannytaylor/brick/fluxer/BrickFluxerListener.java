@@ -1,6 +1,5 @@
 package dev.dannytaylor.brick.fluxer;
 
-import com.j4fluxer.entities.OnlineStatus;
 import com.j4fluxer.entities.member.Member;
 import com.j4fluxer.events.message.GuildMessageReceivedEvent;
 import com.j4fluxer.events.session.ReadyEvent;

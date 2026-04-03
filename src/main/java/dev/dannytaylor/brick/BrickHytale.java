@@ -31,8 +31,8 @@ public class BrickHytale extends JavaPlugin {
 
     @Override
     protected void start() {
-        new Thread(() -> fluxerBot = new BrickFluxerBot()).start();
-        new Thread(() -> discordBot = new BrickDiscordBot()).start();
+        if (BrickConfig.instance.fluxerSettings.enabled.value()) new Thread(() -> fluxerBot = new BrickFluxerBot()).start();
+        if (BrickConfig.instance.discordSettings.enabled.value()) new Thread(() -> discordBot = new BrickDiscordBot()).start();
     }
 
     @Override
