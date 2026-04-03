@@ -74,7 +74,7 @@ public class BrickBot {
     }
 
     private static Optional<Mono<discord4j.core.object.entity.Guild>> getDiscordServer() {
-        return Optional.of(BrickHytale.getDiscord().bot.getGuildById(Snowflake.of(BrickConfig.instance.discordSettings.guildId.value())));
+        return BrickHytale.getDiscord().bot != null ? Optional.of(BrickHytale.getDiscord().bot.getGuildById(Snowflake.of(BrickConfig.instance.discordSettings.guildId.value()))) : Optional.empty();
     }
 
     private static Optional<Mono<GuildChannel>> getDiscordChannel(Long id) {
