@@ -9,7 +9,7 @@ import dev.dannytaylor.brick.logger.BrickLoggerImpl;
 public class BrickFluxerBot {
     public final FluxerImpl bot = (FluxerImpl) FluxerBuilder.create(BrickConfig.instance.fluxerSettings.token.value()).build();
 
-    public static final Route GET_GUILD_EMOJIS = new Route(Route.Method.POST, "/guilds/{guild_id}/emojis");
+    public static final Route GET_GUILD_EMOJIS = new Route(Route.Method.GET, "/guilds/{guild_id}/emojis");
 
     public BrickFluxerBot() {
         BrickLoggerImpl.info("Starting Fluxer Bot...");
