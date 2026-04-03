@@ -12,8 +12,12 @@ import discord4j.core.object.entity.channel.GuildChannel;
 import discord4j.core.object.entity.channel.MessageChannel;
 import reactor.core.publisher.Mono;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.Callable;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class BrickBot {
     private static Guild getFluxerServer() {
@@ -41,9 +45,35 @@ public class BrickBot {
         return Optional.empty();
     }
 
+    private static Map<String, String> getDiscordEmojis(Mono<discord4j.core.object.entity.Guild> guildMono) {
+        HashMap<String, String> emojiMap = new HashMap<>();
+        if (guildMono != null) {
+            discord4j.core.object.entity.Guild guild = guildMono.block();
+            if (guild != null) guild.getEmojis().subscribe(emoji -> emojiMap.put(emoji.getName(), emoji.getId().asString()));
+        }
+        return emojiMap;
+    }
+
+    private static String parseDiscordEmojis(Mono<discord4j.core.object.entity.Guild> guild, String message) {
+        if (guild != null) {
+            Pattern pattern = Pattern.compile(":(\\w+):");
+            Matcher matcher = pattern.matcher(message);
+            StringBuilder builder = new StringBuilder();
+            while (matcher.find()) {
+                String name = matcher.group(1);
+                String id = getDiscordEmojis(guild).get(name);
+                if (id != null) matcher.appendReplacement(builder, "<:" + name + ":" + id + ">");
+                else matcher.appendReplacement(builder, matcher.group());
+            }
+            matcher.appendTail(builder);
+            return builder.toString();
+        }
+        return message;
+    }
+
     private static void sendDiscordMessage(String roleId, String message, MessageType type) {
         Optional<Mono<GuildChannel>> channel = getDiscordChannel(type.getDiscord().getChannelId());
-        channel.ifPresent(guildChannelMono -> guildChannelMono.ofType(MessageChannel.class).flatMap(chat -> chat.createMessage(pingRole(roleId) + "\n" + message)).subscribe());
+        channel.ifPresent(guildChannelMono -> guildChannelMono.ofType(MessageChannel.class).flatMap(chat -> chat.createMessage(pingRole(roleId) + "\n" + parseDiscordEmojis(getDiscordServer().orElse(null), message))).subscribe());
     }
 
     public static void send(String message, String username, MessageType type) {
