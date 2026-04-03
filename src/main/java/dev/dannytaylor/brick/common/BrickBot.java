@@ -117,11 +117,12 @@ public class BrickBot {
         channel.ifPresent(guildChannelMono -> guildChannelMono.ofType(MessageChannel.class).flatMap(chat -> chat.createMessage(pingRole(roleId) + "\n" + parseDiscordEmojis(getDiscordServer().orElse(null), message))).subscribe());
     }
 
-    public static void send(String message, String username, MessageType type) {
-        String processedMessage = getMessage(message, username);
-        createFluxerMessage(type.getFluxer().getRoleId(), processedMessage, type).queue();
-        sendDiscordMessage(type.getDiscord().getRoleId().toString(), processedMessage, type);
-        BrickLoggerImpl.info(type.name() + ": " + processedMessage);
+    public static void send(String message, String username, MessageType type, Platform platform) {
+        String samePlatformMessage = getMessage(message, username);
+        String differentPlatformMessage = getMessage(message, username + platform.getFrom());
+        createFluxerMessage(type.getFluxer().getRoleId(), platform.equals(Platform.FLUXER) ? samePlatformMessage : differentPlatformMessage, type).queue();
+        sendDiscordMessage(type.getDiscord().getRoleId().toString(), platform.equals(Platform.DISCORD) ? samePlatformMessage : differentPlatformMessage, type);
+        BrickLoggerImpl.info(type.name() + ": " + differentPlatformMessage);
     }
 
     private static String getMessage(String message, String username) {
@@ -192,6 +193,21 @@ public class BrickBot {
                 BrickLoggerImpl.error("Error caught whilst getting channelId: " + error);
             }
             return 0L;
+        }
+    }
+
+    public enum Platform {
+        FLUXER(" from Fluxer"),
+        DISCORD(" from Discord");
+
+        private final String from;
+
+        Platform(String from) {
+            this.from = from;
+        }
+
+        public String getFrom() {
+            return this.from;
         }
     }
 }
