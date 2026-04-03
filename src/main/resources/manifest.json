@@ -1,0 +1,9 @@
+{
+  "Group": "dev.dannytaylor",
+  "Name": "BrickBot",
+  "Version": "1.0",
+  "Description": "Fluxer/Discord bot that lets admins send announcement pings from both platforms, built as a Hytale plugin to allow for easy hosting for those with Hytale servers.",
+  "Authors": [{"Name": "legotaylor"}],
+  "Main": "dev.dannytaylor.brick.BrickHytale",
+  "LoadOrder": "POSTWORLD"
+}
