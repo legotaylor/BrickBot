@@ -2,9 +2,9 @@
   "groupId": "dev.dannytaylor",
   "artifactId": "brickbot",
   "modName": "BrickBot",
-  "version": "1.0",
+  "version": "1.1",
   "buildSystem": "Gradle",
   "language": "Java",
-  "jarPath": "build/libs/brickbot-1.0.0.jar",
+  "jarPath": "build/libs/brickbot-1.1.jar",
   "buildTask": "shadowJar"
 }
