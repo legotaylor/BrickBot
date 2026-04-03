@@ -1,20 +1,21 @@
 package dev.dannytaylor.brick.common;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.j4fluxer.entities.channel.TextChannel;
 import com.j4fluxer.entities.guild.Guild;
 import com.j4fluxer.entities.message.Message;
+import com.j4fluxer.internal.requests.Requester;
 import com.j4fluxer.internal.requests.RestAction;
 import dev.dannytaylor.brick.BrickMain;
 import dev.dannytaylor.brick.config.BrickConfig;
+import dev.dannytaylor.brick.fluxer.BrickFluxerBot;
 import dev.dannytaylor.brick.logger.BrickLoggerImpl;
 import discord4j.common.util.Snowflake;
 import discord4j.core.object.entity.channel.GuildChannel;
 import discord4j.core.object.entity.channel.MessageChannel;
 import reactor.core.publisher.Mono;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -24,16 +25,56 @@ public class BrickBot {
         return BrickMain.getFluxer().bot.getGuildById(BrickConfig.instance.fluxerSettings.guildId.value());
     }
 
+    private static RestAction<Map<String, String>> getFluxerEmojis(Guild guild) {
+        if (guild != null) {
+            Requester requester = BrickMain.getFluxer().bot.getRequester();
+            return new RestAction<>(requester, BrickFluxerBot.GET_GUILD_EMOJIS.compile(guild.getId())) {
+                @Override
+                protected Map<String, String> handleResponse(String jsonStr) throws Exception {
+                    Map<String, String> emojiMap = new HashMap<>();
+                    JsonNode array = mapper.readTree(jsonStr);
+                    if (array.isArray()) {
+                        for (JsonNode node : array) {
+                            if (node.has("id") && node.has("name"))
+                                emojiMap.put(node.get("name").asText(), node.get("id").asText());
+                        }
+                    }
+                    return emojiMap;
+                }
+            };
+        }
+        return null;
+    }
+
+    private static String parseFluxerEmojis(Guild guild, String message) {
+        if (guild != null) {
+            Pattern pattern = Pattern.compile(":(\\w+):");
+            Matcher matcher = pattern.matcher(message);
+            StringBuilder builder = new StringBuilder();
+            while (matcher.find()) {
+                String name = matcher.group(1);
+                Map<String, String> emojis = new HashMap<>();
+                getFluxerEmojis(guild).queue(emojis::putAll);
+                String id = emojis.get(name);
+                if (id != null) matcher.appendReplacement(builder, "<:" + name + ":" + id + ">");
+                else matcher.appendReplacement(builder, matcher.group());
+            }
+            matcher.appendTail(builder);
+            return builder.toString();
+        }
+        return message;
+    }
+
     private static TextChannel getFluxerChannel(String id) {
         return getFluxerServer().getTextChannelById(id);
     }
 
     private static RestAction<Message> createFluxerMessage(String roleId, String message, MessageType type) {
-        return getFluxerChannel(type.getFluxer().getChannelId()).sendMessage(pingRole(roleId) + "\n" + message);
+        return getFluxerChannel(type.getFluxer().getChannelId()).sendMessage(pingRole(roleId) + "\n" + parseFluxerEmojis(getFluxerServer(), message));
     }
 
     private static Optional<Mono<discord4j.core.object.entity.Guild>> getDiscordServer() {
-        return Optional.of(BrickMain.getDiscord().bot.getGuildById(Snowflake.of(BrickConfig.instance.discordSettings.guildId.value())));
+        return BrickMain.getDiscord().bot != null ? Optional.of(BrickMain.getDiscord().bot.getGuildById(Snowflake.of(BrickConfig.instance.discordSettings.guildId.value()))) : Optional.empty();
     }
 
     private static Optional<Mono<GuildChannel>> getDiscordChannel(Long id) {
