@@ -6,11 +6,10 @@ import discord4j.core.DiscordClientBuilder;
 import discord4j.core.GatewayDiscordClient;
 
 public class BrickDiscordBot {
-    public GatewayDiscordClient bot;
+    public final GatewayDiscordClient bot = DiscordClientBuilder.create(BrickConfig.instance.discordSettings.token.value()).build().login().block();
 
     public BrickDiscordBot() {
         BrickLoggerImpl.info("Starting Discord Bot...");
-        this.bot = DiscordClientBuilder.create(BrickConfig.instance.discordSettings.token.value()).build().login().block();
         if (this.bot != null) {
             BrickDiscordListener.onReady(this.bot).subscribe();
             BrickDiscordListener.onCommand(this.bot).subscribe();
@@ -18,6 +17,6 @@ public class BrickDiscordBot {
     }
 
     public void shutdown() {
-        this.bot.logout().block();
+        if (this.bot != null) this.bot.logout().block();
     }
 }
