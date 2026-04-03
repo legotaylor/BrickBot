@@ -36,7 +36,7 @@ public class BrickFluxerListener extends ListenerAdapter {
             if (args.length > 1) {
                 StringBuilder message = new StringBuilder();
                 for (int i = 1; i < args.length; i++) message.append(args[i]).append(" ");
-                BrickBot.send(message.toString(), username, type);
+                BrickBot.send(message.toString(), username + " from Fluxer", type);
             } else {
                 BrickLoggerImpl.warn(command + " command failed due to lack of message.");
                 event.getMessage().reply("You must include an announcement!").queue();

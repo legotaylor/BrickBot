@@ -95,7 +95,7 @@ public class BrickDiscordListener {
                             return event.reply().withContent("Invalid type!").withEphemeral(true);
                         }
 
-                        BrickBot.send(message, "@" + user.getUsername(), type);
+                        BrickBot.send(message, "@" + user.getUsername() + " from Discord", type);
                         return event.reply().withContent("Sent announcement!").withEphemeral(true);
                     } else return event.reply().withContent("Missing arguments!").withEphemeral(true);
                 } else return event.reply().withContent("Command interaction could not be found!").withEphemeral(true);
